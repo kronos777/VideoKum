@@ -28,6 +28,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -150,10 +151,14 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
        // setVideoCard(filename.get(0));
 
       //  File sdCardRoot = Environment.DIRECTORY_MOVIES;
-        //PeriodicWorkRequest myWorkRequest = new PeriodicWorkRequest.Builder(KumWorker.class, 20, TimeUnit.MINUTES).build();
-        OneTimeWorkRequest myWorkRequest = new OneTimeWorkRequest.Builder(KumWorker.class).build();
-        WorkManager.getInstance().enqueue(myWorkRequest);
-
+        PeriodicWorkRequest myWorkRequest = new PeriodicWorkRequest.Builder(KumWorker.class, 20, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
+        // OneTimeWorkRequest myWorkRequest = new OneTimeWorkRequest.Builder(KumWorker.class).build();
+        //WorkManager.getInstance().enqueue(myWorkRequest);
+        WorkManager.getInstance().enqueueUniquePeriodicWork(
+                "paymentWork",
+                ExistingPeriodicWorkPolicy.REPLACE,
+                myWorkRequest
+        );
     }
 
     private synchronized boolean isAppExist() {
