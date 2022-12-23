@@ -3,8 +3,7 @@ package com.example.videokum;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-import android.widget.Toast;
+
 
 public class BootCompletedReceiver extends BroadcastReceiver {
 
@@ -19,7 +18,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
             //Intent intent = new Intent(this, MainActivity.class);
             //context.startActivity(MainActivity.class);
-            // TODO Auto-generated method stub
             if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){
                 Intent i = new Intent(context, MainActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -1,8 +1,6 @@
 package com.example.videokum;
 
 
-import static android.widget.Toast.makeText;
-
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,23 +9,19 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.URLUtil;
-import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -39,13 +33,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.net.CookieManager;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -56,11 +45,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     ArrayList<String> filename = new ArrayList<>();
     ArrayList<Integer> videolist = new ArrayList<>();
     int currvideo = 0;
-    TextView result;
 
     ArrayList<String> allLocalFiles = new ArrayList<String>();
     public boolean isConnected;
-    public boolean isInstall;
 
     /*w f screen */
    /*
@@ -128,14 +115,16 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         if (!isConnected) {
             //запускаем видео что уже есть
             playLocal();
+            Toast.makeText(MainActivity.this, "запускаем видео что уже есть" + isConnected, Toast.LENGTH_SHORT).show();
         } else {
             //Toast.makeText(MainActivity.this, "connnection internet" + isConnected, Toast.LENGTH_SHORT).show();
             getAllFilesMovies();
          //   Toast.makeText(MainActivity.this, "name f file" + allLocalFiles.get(0), Toast.LENGTH_SHORT).show();
             getWebsite();
+            Toast.makeText(MainActivity.this, "запускаем видео после синхронизации" + isConnected, Toast.LENGTH_SHORT).show();
             //filename = getAllFilesMovies();
             playLocal();
-            sendMail(allLocalFiles);
+            //sendMail(allLocalFiles);
         }
 
         if (filename.size() > 0) {
@@ -151,14 +140,14 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
        // setVideoCard(filename.get(0));
 
       //  File sdCardRoot = Environment.DIRECTORY_MOVIES;
-        PeriodicWorkRequest myWorkRequest = new PeriodicWorkRequest.Builder(KumWorker.class, 20, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
+        /*PeriodicWorkRequest myWorkRequest = new PeriodicWorkRequest.Builder(KumWorker.class, 20, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
         // OneTimeWorkRequest myWorkRequest = new OneTimeWorkRequest.Builder(KumWorker.class).build();
         //WorkManager.getInstance().enqueue(myWorkRequest);
         WorkManager.getInstance().enqueueUniquePeriodicWork(
                 "paymentWork",
                 ExistingPeriodicWorkPolicy.REPLACE,
                 myWorkRequest
-        );
+        );*/
     }
 
     private synchronized boolean isAppExist() {
@@ -259,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
        }
    }
 
-    public void getWebsite() {
+    public synchronized void getWebsite() {
     //
            new Thread(new Runnable() {
             @Override
@@ -267,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                 final StringBuilder builder = new StringBuilder();
 
                 try {
-                    Document doc = Jsoup.connect("http://iziboro0.beget.tech/kummedia/").get();
+                    Document doc = Jsoup.connect("http://iziboro0.beget.tech/kummedia/orehovo").get();
                     //String title = doc.title();
                     //Elements title = doc.select("h1");
                     Elements links = doc.select("li");

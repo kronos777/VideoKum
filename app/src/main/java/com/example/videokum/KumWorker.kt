@@ -32,7 +32,7 @@ class KumWorker(private val mContext: Context, workerParameters: WorkerParameter
       //  Thread {
             val builder = StringBuilder()
             try {
-                val doc = Jsoup.connect("http://iziboro0.beget.tech/kummedia/").get()
+                val doc = Jsoup.connect("http://iziboro0.beget.tech/kummedia/orehovo").get()
                 //String title = doc.title();
                 //Elements title = doc.select("h1");
                 val links = doc.select("li")
