@@ -199,8 +199,6 @@ public class SplashActivity extends AppCompatActivity {
                         // Thread.sleep(sleepTime);
                         // Thread mainThread = Thread.currentThread();
                         //Toast.makeText(SplashActivity.this, "Все видео загружены. " + allLocalFiles.toString(), Toast.LENGTH_SHORT).show();
-                        //Toast.makeText(MainActivity.this, "Все видео загружены. " + mainThread.getId(), Toast.LENGTH_SHORT).show();
-                        //Toast.makeText(MainActivity.this, "Все видео загружены. " + mainThread.getName(), Toast.LENGTH_SHORT).show();
 
                     }
                 });
