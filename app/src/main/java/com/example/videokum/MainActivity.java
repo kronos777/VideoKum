@@ -9,9 +9,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -21,7 +23,6 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
@@ -35,7 +36,10 @@ import org.jsoup.select.Elements;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
@@ -49,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     ArrayList<String> allLocalFiles = new ArrayList<String>();
     public boolean isConnected;
 
+
+   // public static String DIRECTORY_KUM = "VideoListKum";
     /*w f screen */
    /*
     private List<String> myList;
@@ -108,28 +114,43 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         }*/
 
 
-        isConnected = isOnline();
+        //isConnected = isOnline();
+        isConnected = hasConnection(MainActivity.this);
   //      Toast.makeText(MainActivity.this, "isInstall" + isInstall, Toast.LENGTH_SHORT).show();
+        getAllFilesMovies();
+
+        if(allLocalFiles.size() > 0 ) {
+
+            if (!isConnected) {
+                //запускаем видео что уже есть
+                playLocal();
+                Toast.makeText(MainActivity.this, "запускаем видео что уже есть" + isConnected, Toast.LENGTH_SHORT).show();
+            } else {
+                //Toast.makeText(MainActivity.this, "connnection internet" + isConnected, Toast.LENGTH_SHORT).show();
+                getAllFilesMovies();
+                //   Toast.makeText(MainActivity.this, "name f file" + allLocalFiles.get(0), Toast.LENGTH_SHORT).show();
+                getWebsite(15000);
+                Toast.makeText(MainActivity.this, "запускаем видео после синхронизации" + isConnected, Toast.LENGTH_SHORT).show();
+                //filename = getAllFilesMovies();
+                //playLocal();
+                //sendMail(allLocalFiles);
+            }
+
+            if (filename.size() > 0) {
+                setVideoCard(filename.get(0));
+            }
 
 
-        if (!isConnected) {
-            //запускаем видео что уже есть
-            playLocal();
-            Toast.makeText(MainActivity.this, "запускаем видео что уже есть" + isConnected, Toast.LENGTH_SHORT).show();
         } else {
-            //Toast.makeText(MainActivity.this, "connnection internet" + isConnected, Toast.LENGTH_SHORT).show();
-            getAllFilesMovies();
-         //   Toast.makeText(MainActivity.this, "name f file" + allLocalFiles.get(0), Toast.LENGTH_SHORT).show();
-            getWebsite();
-            Toast.makeText(MainActivity.this, "запускаем видео после синхронизации" + isConnected, Toast.LENGTH_SHORT).show();
-            //filename = getAllFilesMovies();
-            playLocal();
-            //sendMail(allLocalFiles);
+            if (!isConnected) {
+                Toast.makeText(MainActivity.this, "нет подключения к интернету", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "файлов в директории нет" + String.valueOf(allLocalFiles.size()), Toast.LENGTH_SHORT).show();
+                Log.i("no file loc dir:", String.valueOf(allLocalFiles.size()));
+                getWebsite(25000);
+            }
         }
 
-        if (filename.size() > 0) {
-            setVideoCard(filename.get(0));
-        }
 
 
     //    sendMail(allLocalFiles);
@@ -169,6 +190,12 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
             if (f.isFile())
             {
                 String absolutePath = f.getAbsolutePath();
+                if(absolutePath.split("-").length > 1) {
+                    String[] arrnNames = absolutePath.split("/");
+                    String nameFileDefice = arrnNames[arrnNames.length-1];
+                    Toast.makeText(MainActivity.this, "файл содержит дефис" + String.valueOf(nameFileDefice), Toast.LENGTH_SHORT).show();
+                    deleteFileInDevice(nameFileDefice);
+                }
                 //String name = f.getName();
                 Log.i("local names", absolutePath);
                 filename.add(absolutePath);
@@ -189,8 +216,31 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         }
     }
 
+    public boolean hasConnection(final Context context)
+    {
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo wifiInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (wifiInfo != null && wifiInfo.isConnected())
+        {
+            return true;
+        }
+        wifiInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        if (wifiInfo != null && wifiInfo.isConnected())
+        {
+            return true;
+        }
+        wifiInfo = cm.getActiveNetworkInfo();
+        if (wifiInfo != null && wifiInfo.isConnected())
+        {
+            return true;
+        }
+        return false;
+    }
+
+
    private synchronized void downLoadFile(String url) {
        String getUrl = url;
+       //VideoListKum
        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(getUrl));
        String title = URLUtil.guessFileName(getUrl, null, null);
        request.setTitle(title);
@@ -220,17 +270,21 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
    private synchronized ArrayList<String> getAllFilesMovies() {
 
        File sdCardRoot = Environment.getExternalStorageDirectory();
-       File yourDir = new File(sdCardRoot, "Movies");
-       for (File f : yourDir.listFiles()) {
-           if (f.isFile())
-           {
-               String name = f.getName();
-               Log.i("file names", name);
-               allLocalFiles.add(f.getName());
-               //  f.delete();
-           }
+       File videoDir = new File(sdCardRoot, "Movies");
+       if(videoDir.exists()) {
+           for (File f : Objects.requireNonNull(videoDir.listFiles())) {
+               if (f.isFile())
+               {
+                   String name = f.getName();
+                   Log.i("file names", name);
+                   allLocalFiles.add(f.getName());
+               }
 
+           }
+       } else {
+           videoDir.mkdirs();
        }
+
        return allLocalFiles;
    }
 
@@ -248,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
        }
    }
 
-    public synchronized void getWebsite() {
+    public synchronized void getWebsite(int sleepTime) {
     //
            new Thread(new Runnable() {
             @Override
@@ -282,17 +336,23 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
 
                     }
 
+                    if(allLocalFiles.size() > 0) {
+                        for (int i = 0; i < allLocalFiles.size(); i++) {
+                            String locFilesName = allLocalFiles.get(i);
+                            if (mExampleList.contains(locFilesName)) {
+                                Log.d("this file exists ser", locFilesName);
+                                //Toast.makeText(MainActivity.this, "файл присутствует на сервере", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.d("this file no exists ser", locFilesName);
+                               // Toast.makeText(MainActivity.this, "файл отсутствует на сервере", Toast.LENGTH_SHORT).show();
+                                deleteFileInDevice(locFilesName);
+                            }
 
-                    for (int i = 0; i < allLocalFiles.size(); i++) {
-                        String locFilesName = allLocalFiles.get(i);
-                        if (mExampleList.contains(locFilesName)) {
-                            Log.i("this file exists ser", locFilesName);
-                        } else {
-                            Log.i("this file no exists ser", locFilesName);
-                            deleteFileInDevice(locFilesName);
                         }
-
-                    }/**/
+                    } else {
+                        getAllFilesMovies();
+                    }
+                    /**/
 
                     //down(mExampleList.get(0));
 
@@ -308,6 +368,22 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                     public void run() {
 //                        result.setText(builder.toString());
                         //    setNames(mExampleList);
+                       // loadingFinished();
+                        try {
+                            Thread.sleep(sleepTime);
+                            playLocal();
+                            if (filename.size() > 0) {
+                                setVideoCard(filename.get(0));
+                            }
+
+                            Thread mainThread = Thread.currentThread();
+                            Toast.makeText(MainActivity.this, "Все видео загружены. " + allLocalFiles.toString(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainActivity.this, "Все видео загружены. " + mainThread.getId(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainActivity.this, "Все видео загружены. " + mainThread.getName(), Toast.LENGTH_SHORT).show();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                 });
             }
