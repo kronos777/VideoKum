@@ -1,35 +1,18 @@
 package com.example.videokum;
 
 
-import android.app.DownloadManager;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.URLUtil;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -72,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     private synchronized void playLocal() {
         File sdCardRoot = Environment.getExternalStorageDirectory();
         File yourDir = new File(sdCardRoot, "Movies");
-        for (File f : yourDir.listFiles()) {
+        for (File f : Objects.requireNonNull(yourDir.listFiles())) {
             if (f.isFile())
             {
                 String absolutePath = f.getAbsolutePath();
@@ -94,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
    private void deleteFileInDevice(String nameFile) {
            File sdCardRoot = Environment.getExternalStorageDirectory();
            File yourDir = new File(sdCardRoot, "Movies");
-           for (File f : yourDir.listFiles()) {
+           for (File f : Objects.requireNonNull(yourDir.listFiles())) {
                if (f.isFile()) {
                    String name = f.getName();
                    if(name.equals(nameFile)) {
@@ -121,22 +104,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     }
 
 
-
-    class MyListener implements DialogInterface.OnClickListener {
-        public void onClick(DialogInterface dialog, int which)
-        {
-            if (which == -1) {
-                vw.seekTo(0);
-                vw.start();
-            }
-            else {
-                ++currentVideo;
-                if (currentVideo == filename.size())
-                    currentVideo = 0;
-                setVideoCard(filename.get(currentVideo));
-            }
-        }
-    }
 
 
 
