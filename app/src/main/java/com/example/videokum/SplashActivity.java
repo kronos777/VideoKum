@@ -62,6 +62,7 @@ public class SplashActivity extends AppCompatActivity {
         } else {
             if (!isConnected) {
                 Toast.makeText(SplashActivity.this, "нет подключения к интернету", Toast.LENGTH_SHORT).show();
+
             } else {
                 Toast.makeText(SplashActivity.this, "файлов в директории нет" + allLocalFiles.size(), Toast.LENGTH_SHORT).show();
                 getWebsite(35000);
