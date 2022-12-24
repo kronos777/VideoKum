@@ -117,23 +117,22 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         //isConnected = isOnline();
         isConnected = hasConnection(MainActivity.this);
   //      Toast.makeText(MainActivity.this, "isInstall" + isInstall, Toast.LENGTH_SHORT).show();
-        getAllFilesMovies();
+       // getAllFilesMovies();
+        playLocal();
+        if (filename.size() > 0) {
+            setVideoCard(filename.get(0));
+        }
 
-        if(allLocalFiles.size() > 0 ) {
+    /*    if(allLocalFiles.size() > 0 ) {
 
             if (!isConnected) {
-                //запускаем видео что уже есть
                 playLocal();
                 Toast.makeText(MainActivity.this, "запускаем видео что уже есть" + isConnected, Toast.LENGTH_SHORT).show();
             } else {
-                //Toast.makeText(MainActivity.this, "connnection internet" + isConnected, Toast.LENGTH_SHORT).show();
                 getAllFilesMovies();
-                //   Toast.makeText(MainActivity.this, "name f file" + allLocalFiles.get(0), Toast.LENGTH_SHORT).show();
                 getWebsite(15000);
                 Toast.makeText(MainActivity.this, "запускаем видео после синхронизации" + isConnected, Toast.LENGTH_SHORT).show();
-                //filename = getAllFilesMovies();
-                //playLocal();
-                //sendMail(allLocalFiles);
+
             }
 
             if (filename.size() > 0) {
@@ -151,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
             }
         }
 
-
+*/
 
     //    sendMail(allLocalFiles);
 
@@ -193,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                 if(absolutePath.split("-").length > 1) {
                     String[] arrnNames = absolutePath.split("/");
                     String nameFileDefice = arrnNames[arrnNames.length-1];
-                    Toast.makeText(MainActivity.this, "файл содержит дефис" + String.valueOf(nameFileDefice), Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(MainActivity.this, "файл содержит дефис" + String.valueOf(nameFileDefice), Toast.LENGTH_SHORT).show();
                     deleteFileInDevice(nameFileDefice);
                 }
                 //String name = f.getName();
