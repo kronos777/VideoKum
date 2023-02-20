@@ -10,13 +10,14 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.URLUtil;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,7 +41,7 @@ public class SplashActivity extends AppCompatActivity {
        super.onCreate(savedInstanceState);
        setContentView(R.layout.activity_splash);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
@@ -114,7 +115,7 @@ public class SplashActivity extends AppCompatActivity {
             final StringBuilder builder = new StringBuilder();
 
             try {
-                Document doc = Jsoup.connect("http://iziboro0.beget.tech/kummedia/orehovo").get();
+                Document doc = Jsoup.connect("http://iziboro0.beget.tech/kummedia/pposadstoyca/").get();
                 Elements links = doc.select("li");
                 ArrayList<String> mExampleList = new ArrayList<>();
 

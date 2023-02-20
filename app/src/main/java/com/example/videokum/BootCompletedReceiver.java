@@ -19,7 +19,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             //Intent intent = new Intent(this, MainActivity.class);
             //context.startActivity(MainActivity.class);
             if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){
-                Intent i = new Intent(context, MainActivity.class);
+                Intent i = new Intent(context, SplashActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(i);
             }
