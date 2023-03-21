@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     @Override
     protected void onResume() {
         super.onResume();
-        Toast.makeText(MainActivity.this, "onResume", Toast.LENGTH_SHORT).show();
+      //  Toast.makeText(MainActivity.this, "onResume", Toast.LENGTH_SHORT).show();
         playLocal();
         if (filename.size() > 0) {
             setVideoCard(filename.get(0));
