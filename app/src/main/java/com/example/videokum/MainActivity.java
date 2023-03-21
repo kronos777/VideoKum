@@ -5,13 +5,13 @@ import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,9 +35,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
 
 
         //full screen option
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+       // setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+        //keep screen on
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         playLocal();
         if (filename.size() > 0) {
@@ -51,6 +55,10 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     protected void onResume() {
         super.onResume();
         Toast.makeText(MainActivity.this, "onResume", Toast.LENGTH_SHORT).show();
+        playLocal();
+        if (filename.size() > 0) {
+            setVideoCard(filename.get(0));
+        }
     }
 
     private synchronized void playLocal() {

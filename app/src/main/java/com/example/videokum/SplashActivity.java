@@ -11,13 +11,13 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -58,16 +58,19 @@ public class SplashActivity extends AppCompatActivity {
             if (isConnected) {
                 getWebsite(20000);
                 Toast.makeText(SplashActivity.this, "запускаем видео после синхронизации" + isConnected, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(SplashActivity.this, "интернета нет, но файлы в директории есть" + allLocalFiles.size(), Toast.LENGTH_SHORT).show();
+                launchMainActivity(30000);
             }
 
         } else {
             if (!isConnected) {
-                Toast.makeText(SplashActivity.this, "нет подключения к интернету", Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(SplashActivity.this, "файлов в директории нет и интернета тоже нет" + allLocalFiles.size(), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(SplashActivity.this, "файлов в директории нет" + allLocalFiles.size(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SplashActivity.this, "файлов в директории нет а подключение есть" + allLocalFiles.size(), Toast.LENGTH_SHORT).show();
                 getWebsite(35000);
             }
+
         }
 
 
