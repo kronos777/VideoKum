@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
             }
 
         }
+       // Toast.makeText(MainActivity.this, "файлы для воспроизведения" + String.valueOf(filename), Toast.LENGTH_SHORT).show();
     }
 
 
