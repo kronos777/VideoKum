@@ -6,12 +6,9 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 import android.widget.VideoView;
-
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         }
     }
 
-    private synchronized void playLocal() {
+    private void playLocal() {
         File sdCardRoot = Environment.getExternalStorageDirectory();
         File yourDir = new File(sdCardRoot, "Movies");
         for (File f : Objects.requireNonNull(yourDir.listFiles())) {
@@ -71,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                 if(absolutePath.split("-").length > 1) {
                     String[] arrnNames = absolutePath.split("/");
                     String nameFileDefice = arrnNames[arrnNames.length-1];
-                   // Toast.makeText(MainActivity.this, "файл содержит дефис" + String.valueOf(nameFileDefice), Toast.LENGTH_SHORT).show();
                     deleteFileInDevice(nameFileDefice);
                 }
 
@@ -92,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                    String name = f.getName();
                    if(name.equals(nameFile)) {
                        f.delete();
-                       Log.i("has been delete", name);
                    }
                }
        }

@@ -7,7 +7,7 @@ import android.content.Intent;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
 
-    private String your_message = "Reciver work";
+    private final String your_message = "Reciver work";
 
     public BootCompletedReceiver() {
     }
@@ -15,7 +15,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
     @Override
      public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
-
             //Intent intent = new Intent(this, MainActivity.class);
             //context.startActivity(MainActivity.class);
             if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){
@@ -23,7 +22,10 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(i);
             }
-            // ваш код здесь
         }
+    }
+
+    public String getYour_message() {
+        return your_message;
     }
 }

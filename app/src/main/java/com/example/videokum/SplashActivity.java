@@ -2,8 +2,10 @@ package com.example.videokum;
 
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -16,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.URLUtil;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 
@@ -36,28 +39,66 @@ public class SplashActivity extends AppCompatActivity {
     ArrayList<String> allLocalFiles = new ArrayList<>();
     public boolean isConnected;
 
+    public long downloadID;
+    ArrayList<String> newLnkList = new ArrayList<>();
+    int identifierDownload = 1;
+
+    ProgressBar progressBar;
+
+    private final BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //Fetching the download id received with the broadcast
+            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+            //Checking if the received broadcast is for our enqueued download by matching download id
+            if (downloadID == id) {
+                //Toast.makeText(SplashActivity.this, "Загрузка завершена " + itendifierDownload, Toast.LENGTH_SHORT).show();
+                if(newLnkList.size() == 1) {
+                    stopDownloadingProcess("Приятного просмотра.");
+                } else if (newLnkList.size() > 1) {
+                    if(newLnkList.size()-1 == identifierDownload) {
+                        stopDownloadingProcess("Приятного просмотра.");
+                    } else {
+                        //Log.d("currentDownloadFile", newLnkList.get(identifierDownload).toString());
+                        downLoadFile(newLnkList.get(identifierDownload));
+                        ++identifierDownload;
+                    }
+
+                }
+            }
+
+        }
+    };
+
+
+    @SuppressLint({"SourceLockedOrientationActivity", "UnspecifiedRegisterReceiverFlag"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
        super.onCreate(savedInstanceState);
        setContentView(R.layout.activity_splash);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+       setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+       getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+       getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
-        //проверяем есть ли соединение
-        isConnected = hasConnection(SplashActivity.this);
-        //смотрим все файлы на локальном носителе
-        getAllFilesMovies();
+       progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+       //check internet connected
+       isConnected = hasConnection(SplashActivity.this);
+       //see all local files
+       getAllFilesMovies();
+       setModeExecutable(isConnected);
+       registerReceiver(onDownloadComplete,new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+    }
 
 
-
-
+    private void setModeExecutable(boolean isConnected) {
         if(allLocalFiles.size() > 0 ) {
 
             if (isConnected) {
-                getWebsite(20000);
-                Toast.makeText(SplashActivity.this, "запускаем видео после синхронизации" + isConnected, Toast.LENGTH_SHORT).show();
+                getWebsite();
+                // Toast.makeText(SplashActivity.this, "запускаем видео после синхронизации" + isConnected, Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(SplashActivity.this, "интернета нет, но файлы в директории есть" + allLocalFiles.size(), Toast.LENGTH_SHORT).show();
                 launchMainActivity(30000);
@@ -67,16 +108,12 @@ public class SplashActivity extends AppCompatActivity {
             if (!isConnected) {
                 Toast.makeText(SplashActivity.this, "файлов в директории нет и интернета тоже нет." + allLocalFiles.size(), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(SplashActivity.this, "файлов в директории нет а подключение есть" + allLocalFiles.size(), Toast.LENGTH_SHORT).show();
-                getWebsite(35000);
+                // Toast.makeText(SplashActivity.this, "файлов в директории нет, а подключение есть" + allLocalFiles.size(), Toast.LENGTH_SHORT).show();
+                getWebsite();
             }
 
         }
-
-
     }
-
-
 
 
     private boolean hasConnection(final Context context)
@@ -96,7 +133,7 @@ public class SplashActivity extends AppCompatActivity {
         return wifiInfo != null && wifiInfo.isConnected();
     }
 
-    private synchronized void getAllFilesMovies() {
+    private void getAllFilesMovies() {
 
         File sdCardRoot = Environment.getExternalStorageDirectory();
         File videoDir = new File(sdCardRoot, "Movies");
@@ -110,9 +147,10 @@ public class SplashActivity extends AppCompatActivity {
                 }
 
             }
+
     }
 
-    private synchronized void getWebsite(int sleepTime) {
+    private void getWebsite() {
         //
         new Thread(() -> {
             final StringBuilder builder = new StringBuilder();
@@ -122,15 +160,15 @@ public class SplashActivity extends AppCompatActivity {
                 Elements links = doc.select("li");
                 ArrayList<String> mExampleList = new ArrayList<>();
 
+
                 for (Element link : links) {
                     String[] stringSite = link.text().split("/");
                     String fileName = stringSite[stringSite.length-1];
                     mExampleList.add(fileName);
                     if (!allLocalFiles.contains(fileName)) {
-                       downLoadFile(link.text());
+                      // downLoadFile(link.text());
+                        newLnkList.add(link.text());
                     }
-
-
                 }
 
                 if(allLocalFiles.size() > 0) {
@@ -139,10 +177,16 @@ public class SplashActivity extends AppCompatActivity {
                         if (!mExampleList.contains(locFilesName)) {
                            deleteFileInDevice(locFilesName);
                         }
-
                     }
                 } else {
                     getAllFilesMovies();
+                }
+
+                if(newLnkList.size() > 0){
+                    runOnUiThread(() -> startDownloadingProcess("Начался процесс синхронизации с сервером, пожалуйста подождите."));
+                } else {
+                    //go see movie
+                    runOnUiThread(() -> goNextActivity("Новых файлов на сервере нет. Приятного просмотра."));
                 }
 
 
@@ -150,8 +194,25 @@ public class SplashActivity extends AppCompatActivity {
                 builder.append("Error : ").append(e.getMessage()).append("\n");
             }
 
-            runOnUiThread(() -> launchMainActivity(sleepTime));
+           // runOnUiThread(() -> launchMainActivity(sleepTime));
         }).start();
+    }
+
+    private void startDownloadingProcess(String message) {
+        downLoadFile(newLnkList.get(0));
+        progressBar.setVisibility(ProgressBar.VISIBLE);
+        Toast.makeText(SplashActivity.this, message, Toast.LENGTH_LONG).show();
+    }
+
+    private void stopDownloadingProcess(String message) {
+        progressBar.setVisibility(ProgressBar.INVISIBLE);
+        Toast.makeText(SplashActivity.this, message, Toast.LENGTH_LONG).show();
+        launchMainActivity(0);
+    }
+
+    private void goNextActivity(String message) {
+        Toast.makeText(SplashActivity.this, message, Toast.LENGTH_SHORT).show();
+        launchMainActivity(0);
     }
 
     private void launchMainActivity(int time){
@@ -175,7 +236,7 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
-    private synchronized void downLoadFile(String url) {
+    private void downLoadFile(String url) {
         //VideoListKum
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         String title = URLUtil.guessFileName(url, null, null);
@@ -185,8 +246,14 @@ public class SplashActivity extends AppCompatActivity {
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MOVIES, title);
 
         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        downloadManager.enqueue(request);
+        downloadID = downloadManager.enqueue(request);
         Log.i("file names download", title);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(onDownloadComplete);
     }
 
 

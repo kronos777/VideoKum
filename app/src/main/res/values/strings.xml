@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">VideoKum</string>
+    <string name="kpd_media_group">KPD media group</string>
 </resources>
